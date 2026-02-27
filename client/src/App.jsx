@@ -174,24 +174,31 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            isAuthenticated ? (
-              <div className="h-screen flex flex-col bg-background text-gray-100">
-                <header className="h-14 flex items-center justify-between px-4 border-b border-gray-800 bg-panel sticky top-0 z-20">
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg font-semibold">CU LeetCode Clone</span>
-                  </div>
+            /* Step 1: Remove the isAuthenticated check here */
+            <div className="h-screen flex flex-col bg-background text-gray-100">
+              <header className="h-14 flex items-center justify-between px-4 border-b border-gray-800 bg-panel sticky top-0 z-20">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-semibold">CU LeetCode Clone</span>
+                  {/* Step 2: Show Guest Label if not logged in */}
+                  {!isAuthenticated && (
+                    <span className="text-[10px] bg-yellow-600/20 text-yellow-500 border border-yellow-500/50 px-2 py-0.5 rounded">
+                      Guest Mode (Read Only)
+                    </span>
+                  )}
+                </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowDashboard((prev) => !prev)}
-                      className="flex items-center gap-1 px-2 py-1 rounded border border-gray-700 text-xs"
-                    >
-                      {showDashboard ? <ChevronLeftIcon className="w-3 h-3" /> : <ChevronRightIcon className="w-3 h-3" />}
-                      <span>{showDashboard ? 'Hide Problems' : 'Show Problems'}</span>
-                    </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDashboard((prev) => !prev)}
+                    className="flex items-center gap-1 px-2 py-1 rounded border border-gray-700 text-xs"
+                  >
+                    {showDashboard ? <ChevronLeftIcon className="w-3 h-3" /> : <ChevronRightIcon className="w-3 h-3" />}
+                    <span>{showDashboard ? 'Hide Problems' : 'Show Problems'}</span>
+                  </button>
 
-                    {/* LOGOUT: Clears session and returns to the Welcome Page */}
+                  {/* Step 3: Show Login button for guests, Logout for users */}
+                  {isAuthenticated ? (
                     <button
                       onClick={() => {
                         localStorage.removeItem('userId');
@@ -201,39 +208,49 @@ export default function App() {
                     >
                       Logout
                     </button>
+                  ) : (
+                    <button
+                      onClick={() => window.location.href = '/login'}
+                      className="px-3 py-1 bg-blue-600 rounded text-xs hover:bg-blue-500 font-bold text-white ml-2"
+                    >
+                      Login to Solve
+                    </button>
+                  )}
+                </div>
+              </header>
+
+              {loading && <div className="flex-1 flex items-center justify-center">Loading problems...</div>}
+              {error && !loading && <div className="flex-1 flex items-center justify-center text-red-400">{error}</div>}
+
+              {!loading && !error && (
+                <main ref={mainRef} className="flex-1 flex overflow-hidden">
+                  {showDashboard && (
+                    <>
+                      <div className="h-full border-r border-gray-900" style={{ width: `${dashboardWidth}%` }}>
+                        <ProblemDashboard
+                          problems={problems}
+                          selectedTopic={selectedTopic}
+                          onSelectTopic={setSelectedTopic}
+                          searchQuery={searchQuery}
+                          onSearchQueryChange={setSearchQuery}
+                          onSelectProblem={handleSelectProblem}
+                          selectedSlug={selectedProblem?.slug}
+                        />
+                      </div>
+                      <div className="w-1 bg-gray-800 hover:bg-accent cursor-col-resize" onMouseDown={handleOuterDividerMouseDown} />
+                    </>
+                  )}
+                  <div className="flex-1 flex flex-col bg-background">
+                    {/* Step 4: Pass isAuthenticated to the Workspace */}
+                    <Workspace
+                      problem={selectedProblem}
+                      layoutSignal={layoutSignal}
+                      isAuthenticated={isAuthenticated}
+                    />
                   </div>
-                </header>
-
-                {loading && <div className="flex-1 flex items-center justify-center">Loading problems...</div>}
-                {error && !loading && <div className="flex-1 flex items-center justify-center text-red-400">{error}</div>}
-
-                {!loading && !error && (
-                  <main ref={mainRef} className="flex-1 flex overflow-hidden">
-                    {showDashboard && (
-                      <>
-                        <div className="h-full border-r border-gray-900" style={{ width: `${dashboardWidth}%` }}>
-                          <ProblemDashboard
-                            problems={problems}
-                            selectedTopic={selectedTopic}
-                            onSelectTopic={setSelectedTopic}
-                            searchQuery={searchQuery}
-                            onSearchQueryChange={setSearchQuery}
-                            onSelectProblem={handleSelectProblem}
-                            selectedSlug={selectedProblem?.slug}
-                          />
-                        </div>
-                        <div className="w-1 bg-gray-800 hover:bg-accent cursor-col-resize" onMouseDown={handleOuterDividerMouseDown} />
-                      </>
-                    )}
-                    <div className="flex-1 flex flex-col bg-background">
-                      <Workspace problem={selectedProblem} layoutSignal={layoutSignal} />
-                    </div>
-                  </main>
-                )}
-              </div>
-            ) : (
-              <Navigate to="/login" />
-            )
+                </main>
+              )}
+            </div>
           }
         />
       </Routes>

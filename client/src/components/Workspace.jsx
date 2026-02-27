@@ -1,18 +1,19 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Editor } from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
-import AuthModal from './AuthModal'; 
+import AuthModal from './AuthModal';
 
 const DEFAULT_LANG = 'javascript';
 
-export default function Workspace({ problem, layoutSignal }) {
+//export default function Workspace({ problem, layoutSignal }) {
+export default function Workspace({ problem, layoutSignal, isAuthenticated }) {
   const [language, setLanguage] = useState(DEFAULT_LANG);
   const [codeCache, setCodeCache] = useState({});
   const [descriptionWidth, setDescriptionWidth] = useState(50);
-  
+
   // --- AUTHENTICATION STATE ---
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const containerRef = useRef(null);
   const editorRef = useRef(null);
@@ -22,12 +23,13 @@ export default function Workspace({ problem, layoutSignal }) {
     return Object.keys(problem.code_snippets);
   }, [problem]);
 
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const userId = localStorage.getItem('userId');
+  //   if (userId) {
+  //     setIsLoggedIn(true);
+  //   }
+  // }, []);
+  const isLoggedIn = isAuthenticated;
 
   const handleProtectedAction = (e) => {
     if (!isLoggedIn) {
@@ -49,7 +51,7 @@ export default function Workspace({ problem, layoutSignal }) {
 
     // Grab the code they currently have typed in the editor
     const currentCode = codeCache[language];
-    
+
     // For now, since the backend isn't ready, we just show a cool alert
     console.log(`Submitting ${language} code:`, currentCode);
     alert("🚀 Code submitted successfully! (Backend grading coming soon)");
@@ -60,21 +62,21 @@ export default function Workspace({ problem, layoutSignal }) {
     if (!problem?.code_snippets) return;
     const availableLangs = Object.keys(problem.code_snippets);
     const initialLang = availableLangs.includes(language) ? language : availableLangs[0];
-    
+
     setLanguage(initialLang);
-    
+
     const newCache = {};
     availableLangs.forEach(lang => {
       newCache[lang] = problem.code_snippets[lang];
     });
-    
+
     setCodeCache(newCache);
-  }, [problem?.slug]); 
+  }, [problem?.slug]);
 
   const handleLanguageChange = (e) => {
     if (!isLoggedIn) {
-        setShowAuthModal(true);
-        return;
+      setShowAuthModal(true);
+      return;
     }
     setLanguage(e.target.value);
   };
@@ -134,7 +136,7 @@ export default function Workspace({ problem, layoutSignal }) {
           <h2 className="text-lg font-semibold">{problem.title}</h2>
           <p className="text-xs text-gray-400">{problem.slug}</p>
         </div>
-        
+
         {/* ADDED SUBMIT BUTTON NEXT TO LANGUAGE DROPDOWN */}
         <div className="flex items-center gap-4">
           <label className="text-sm text-gray-300">
@@ -152,7 +154,7 @@ export default function Workspace({ problem, layoutSignal }) {
             </select>
           </label>
 
-          <button 
+          <button
             onClick={handleSubmit}
             className="bg-green-600 hover:bg-green-500 text-white font-bold py-1.5 px-6 rounded-md shadow-lg transition-colors text-sm"
           >
@@ -210,20 +212,27 @@ export default function Workspace({ problem, layoutSignal }) {
           onMouseDown={handleInnerDividerMouseDown}
         />
 
+
+
+
         {/* --- EDITOR SECTION --- */}
         <section
           className="flex flex-col bg-background relative"
           style={{ width: `${100 - descriptionWidth}%` }}
         >
           <div className="flex-1 overflow-hidden relative">
-            
-            {/* THE INVISIBLE SHIELD: Triggers popup if clicked while logged out */}
+
+            {/* THE VISIBLE SHIELD: Blurs the editor and shows a lock badge */}
             {!isLoggedIn && (
-                <div 
-                    className="absolute inset-0 z-20 cursor-pointer bg-transparent"
-                    onClick={handleProtectedAction}
-                    title="Log in to start coding"
-                />
+              <div
+                className="absolute inset-0 z-30 cursor-pointer bg-black/20 backdrop-blur-[2px] flex items-center justify-center"
+                onClick={handleProtectedAction}
+                title="Log in to start coding"
+              >
+                <div className="bg-gray-800 border border-blue-500 px-4 py-2 rounded shadow-lg text-white font-bold animate-pulse">
+                  🔒 Login to Edit Code
+                </div>
+              </div>
             )}
 
             <Editor
@@ -239,17 +248,18 @@ export default function Workspace({ problem, layoutSignal }) {
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 smoothScrolling: true,
-                automaticLayout: true 
+                automaticLayout: true
               }}
             />
           </div>
         </section>
+
       </div>
 
       {/* Render the AuthModal on top of everything */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
     </div>
   );

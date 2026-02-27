@@ -10,7 +10,7 @@ const Welcome = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
                 {/* Card 1 */}
-                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 hover:border-blue-500 transition cursor-pointer group" onClick={() => window.location.href = '/login'}>
+                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 hover:border-blue-500 transition cursor-pointer group" onClick={() => window.location.href = '/dashboard'}>
                     <h3 className="text-2xl font-bold mb-2">Try Problems</h3>
                     <p className="text-gray-400 text-sm">Solve 500+ coding challenges from our database.</p>
                     <div className="mt-4 text-blue-400 font-semibold group-hover:underline">Get Started &rarr;</div>
