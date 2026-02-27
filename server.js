@@ -10,6 +10,8 @@ app.use(cors());
 app.use(express.json());
 
 const DATA_PATH = path.join(__dirname, 'problems_db(1).json');
+const testCases = require(path.join(__dirname, 'testCase.js'));
+console.log("Loaded tests for:", Object.keys(testCases));
 
 let problemsCache = null;
 
