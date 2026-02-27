@@ -1,0 +1,24 @@
+=== CU-HACKATHON-2026 INSTALLATION RUNNER ===
+
+STEP 1: BACKEND INSTALLATION
+Run this command in the root folder:
+npm install express cors mongoose nodemailer dotenv @google/generative-ai crypto
+
+STEP 2: FRONTEND INSTALLATION
+Run these commands:
+cd client
+npm install @monaco-editor/react react-markdown lucide-react
+
+STEP 3: CONFIGURATION
+Ensure you have a .env file in the root directory with:
+- MONGO_URI
+- EMAIL_USER
+- EMAIL_PASS
+- JDOODLE_CLIENT_ID
+- JDOODLE_CLIENT_SECRET
+- GEMINI_API_KEY
+
+STEP 4: STARTING THE APP
+Backend: node server.js
+Frontend: cd client && npm run dev
+=============================================

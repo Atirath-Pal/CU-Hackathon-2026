@@ -14,6 +14,9 @@ export default function Workspace({ problem, layoutSignal }) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // --- EXECUTION STATE ---
+  const [isExecuting, setIsExecuting] = useState(false);
+
   const containerRef = useRef(null);
   const editorRef = useRef(null);
 
@@ -39,22 +42,47 @@ export default function Workspace({ problem, layoutSignal }) {
     }
   };
 
-  // --- NEW SUBMIT FUNCTION ---
-  const handleSubmit = () => {
+  // ==========================================
+  // JDOODLE SUBMIT FUNCTION
+  // ==========================================
+  const handleSubmit = async () => {
     if (!isLoggedIn) {
-      // Show the hacker modal if they aren't logged in!
       setShowAuthModal(true);
       return;
     }
 
-    // Grab the code they currently have typed in the editor
     const currentCode = codeCache[language];
     
-    // For now, since the backend isn't ready, we just show a cool alert
-    console.log(`Submitting ${language} code:`, currentCode);
-    alert("🚀 Code submitted successfully! (Backend grading coming soon)");
+    if (!currentCode || currentCode.trim() === '') {
+        alert("Please write some code before submitting!");
+        return;
+    }
+
+    setIsExecuting(true);
+    
+    try {
+        const response = await fetch('http://localhost:4000/api/run-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language: language, code: currentCode })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert(`Execution Error:\n${data.error}`);
+        } else {
+            // Show the actual compiled output from JDoodle!
+            alert(`💻 Terminal Output:\n\n${data.output}\n\n⏱️ CPU Time: ${data.cpuTime}s\n🧠 Memory: ${data.memory} KB`);
+        }
+        
+    } catch (err) {
+        console.error("Frontend Fetch Error:", err);
+        alert("🚨 Could not connect to the backend server. Make sure your server.js is running!");
+    } finally {
+        setIsExecuting(false);
+    }
   };
-  // ---------------------------
 
   useEffect(() => {
     if (!problem?.code_snippets) return;
@@ -135,7 +163,6 @@ export default function Workspace({ problem, layoutSignal }) {
           <p className="text-xs text-gray-400">{problem.slug}</p>
         </div>
         
-        {/* ADDED SUBMIT BUTTON NEXT TO LANGUAGE DROPDOWN */}
         <div className="flex items-center gap-4">
           <label className="text-sm text-gray-300">
             Language:
@@ -154,9 +181,12 @@ export default function Workspace({ problem, layoutSignal }) {
 
           <button 
             onClick={handleSubmit}
-            className="bg-green-600 hover:bg-green-500 text-white font-bold py-1.5 px-6 rounded-md shadow-lg transition-colors text-sm"
+            disabled={isExecuting}
+            className={`font-bold py-1.5 px-6 rounded-md shadow-lg transition-colors text-sm ${
+                isExecuting ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500 text-white'
+            }`}
           >
-            Submit
+            {isExecuting ? 'Running...' : 'Submit'}
           </button>
         </div>
       </header>
@@ -210,14 +240,12 @@ export default function Workspace({ problem, layoutSignal }) {
           onMouseDown={handleInnerDividerMouseDown}
         />
 
-        {/* --- EDITOR SECTION --- */}
         <section
           className="flex flex-col bg-background relative"
           style={{ width: `${100 - descriptionWidth}%` }}
         >
           <div className="flex-1 overflow-hidden relative">
             
-            {/* THE INVISIBLE SHIELD: Triggers popup if clicked while logged out */}
             {!isLoggedIn && (
                 <div 
                     className="absolute inset-0 z-20 cursor-pointer bg-transparent"
@@ -246,7 +274,6 @@ export default function Workspace({ problem, layoutSignal }) {
         </section>
       </div>
 
-      {/* Render the AuthModal on top of everything */}
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
