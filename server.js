@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+<<<<<<< HEAD
 // ==========================================
 // 1. MONGODB & AI INITIALIZATION
 // ==========================================
@@ -22,6 +23,11 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/cu-hackatho
     useUnifiedTopology: true
 }).then(() => console.log('🔥 MongoDB Connected'))
   .catch(err => console.error('MongoDB Error:', err));
+=======
+const DATA_PATH = path.join(__dirname, 'problems_db(1).json');
+const testCases = require(path.join(__dirname, 'testCase.js'));
+console.log("Loaded tests for:", Object.keys(testCases));
+>>>>>>> 193def8308a21742e3e16cc8d7527616d7b79521
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const User = require('./models/User');
