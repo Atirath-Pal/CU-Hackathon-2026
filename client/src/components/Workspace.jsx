@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Editor } from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
-import AuthModal from './AuthModal'; 
+import AuthModal from './AuthModal';
 
 const DEFAULT_LANG = 'javascript';
 
@@ -9,7 +9,7 @@ export default function Workspace({ problem, layoutSignal }) {
   const [language, setLanguage] = useState(DEFAULT_LANG);
   const [codeCache, setCodeCache] = useState({});
   const [descriptionWidth, setDescriptionWidth] = useState(50);
-  
+
   // --- AUTHENTICATION STATE ---
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,35 +52,35 @@ export default function Workspace({ problem, layoutSignal }) {
     }
 
     const currentCode = codeCache[language];
-    
+
     if (!currentCode || currentCode.trim() === '') {
-        alert("Please write some code before submitting!");
-        return;
+      alert("Please write some code before submitting!");
+      return;
     }
 
     setIsExecuting(true);
-    
+
     try {
-        const response = await fetch('http://localhost:4000/api/run-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ language: language, code: currentCode })
-        });
-        
-        const data = await response.json();
-        
-        if (data.error) {
-            alert(`Execution Error:\n${data.error}`);
-        } else {
-            // Show the actual compiled output from JDoodle!
-            alert(`💻 Terminal Output:\n\n${data.output}\n\n⏱️ CPU Time: ${data.cpuTime}s\n🧠 Memory: ${data.memory} KB`);
-        }
-        
+      const response = await fetch('http://localhost:4000/api/run-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: language, code: currentCode })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        alert(`Execution Error:\n${data.error}`);
+      } else {
+        // Show the actual compiled output from JDoodle!
+        alert(`💻 Terminal Output:\n\n${data.output}\n\n⏱️ CPU Time: ${data.cpuTime}s\n🧠 Memory: ${data.memory} KB`);
+      }
+
     } catch (err) {
-        console.error("Frontend Fetch Error:", err);
-        alert("🚨 Could not connect to the backend server. Make sure your server.js is running!");
+      console.error("Frontend Fetch Error:", err);
+      alert("🚨 Could not connect to the backend server. Make sure your server.js is running!");
     } finally {
-        setIsExecuting(false);
+      setIsExecuting(false);
     }
   };
 
@@ -88,21 +88,21 @@ export default function Workspace({ problem, layoutSignal }) {
     if (!problem?.code_snippets) return;
     const availableLangs = Object.keys(problem.code_snippets);
     const initialLang = availableLangs.includes(language) ? language : availableLangs[0];
-    
+
     setLanguage(initialLang);
-    
+
     const newCache = {};
     availableLangs.forEach(lang => {
       newCache[lang] = problem.code_snippets[lang];
     });
-    
+
     setCodeCache(newCache);
-  }, [problem?.slug]); 
+  }, [problem?.slug]);
 
   const handleLanguageChange = (e) => {
     if (!isLoggedIn) {
-        setShowAuthModal(true);
-        return;
+      setShowAuthModal(true);
+      return;
     }
     setLanguage(e.target.value);
   };
@@ -162,7 +162,7 @@ export default function Workspace({ problem, layoutSignal }) {
           <h2 className="text-lg font-semibold">{problem.title}</h2>
           <p className="text-xs text-gray-400">{problem.slug}</p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <label className="text-sm text-gray-300">
             Language:
@@ -179,12 +179,11 @@ export default function Workspace({ problem, layoutSignal }) {
             </select>
           </label>
 
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={isExecuting}
-            className={`font-bold py-1.5 px-6 rounded-md shadow-lg transition-colors text-sm ${
-                isExecuting ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500 text-white'
-            }`}
+            className={`font-bold py-1.5 px-6 rounded-md shadow-lg transition-colors text-sm ${isExecuting ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-500 text-white'
+              }`}
           >
             {isExecuting ? 'Running...' : 'Submit'}
           </button>
@@ -245,13 +244,13 @@ export default function Workspace({ problem, layoutSignal }) {
           style={{ width: `${100 - descriptionWidth}%` }}
         >
           <div className="flex-1 overflow-hidden relative">
-            
+
             {!isLoggedIn && (
-                <div 
-                    className="absolute inset-0 z-20 cursor-pointer bg-transparent"
-                    onClick={handleProtectedAction}
-                    title="Log in to start coding"
-                />
+              <div
+                className="absolute inset-0 z-20 cursor-pointer bg-transparent"
+                onClick={handleProtectedAction}
+                title="Log in to start coding"
+              />
             )}
 
             <Editor
@@ -267,17 +266,18 @@ export default function Workspace({ problem, layoutSignal }) {
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 smoothScrolling: true,
-                automaticLayout: true 
+                automaticLayout: true
               }}
             />
           </div>
         </section>
       </div>
 
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
     </div>
   );
 }
+

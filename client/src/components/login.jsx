@@ -24,6 +24,7 @@ const Login = () => {
             const data = await response.json();
             if (data.success) {
                 localStorage.setItem('userId', data.userId);
+                localStorage.setItem('isVerified', 'true');
                 window.location.href = '/dashboard';
             } else {
                 setMessage(data.message || "Login failed");
